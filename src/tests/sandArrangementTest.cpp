@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
            std::shared_ptr<Adventure>(new TeamAdventure(2)),
            std::shared_ptr<Adventure>(new TeamAdventure(3)),
            std::shared_ptr<Adventure>(new TeamAdventure(4)),
-           std::shared_ptr<Adventure>(new TeamAdventure(8))}) {
+           std::shared_ptr<Adventure>(new TeamAdventure(5))}) {
     if (argc == 1) {
       runAndPrintDuration([&adventure]() {
       testCase1(*adventure);

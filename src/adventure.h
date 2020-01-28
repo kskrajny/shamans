@@ -83,7 +83,8 @@ public:
   typedef std::vector<uint64_t> col;
   typedef std::vector<col> matrix;
   typedef std::shared_ptr<matrix> shr;
-  static void findEgg(const uint64_t& len, const uint64_t& e, size_t f, size_t r, shr A, std::vector<Egg>& eggs, TeamAdventure* team) {
+  static void findEgg(const uint64_t& len, const uint64_t& e, size_t f, size_t r,
+          shr A, std::vector<Egg>& eggs, TeamAdventure* team, uint64_t sha) {
       if(r-f <= len) {
           for(uint64_t i=f;i<=r;i++) {
               uint64_t size = eggs[e-1].getSize();
@@ -94,9 +95,11 @@ public:
               }
           }
       } else {
-          uint64_t m = (f+r)/2;
-          auto x = team->councilOfShamans.enqueue(findEgg, len, e, f, m, A, eggs, team);
-          findEgg(len, e, m+1, r, A, eggs, team);
+          uint64_t m = (r-f)*std::floor(sha/2)/sha + f;
+          uint64_t help = sha;
+          sha /= 2;
+          auto x = team->councilOfShamans.enqueue(findEgg, len, e, f, m, A, eggs, team, sha);
+          findEgg(len, e, m+1, r, A, eggs, team, help-sha);
           x.wait();
       }
   }
@@ -107,18 +110,22 @@ public:
       const uint64_t len = W/numberOfShamans+1;
       auto A = std::make_shared<matrix>(n, col(W, 0));
       for (uint64_t i=1;i<n;i++) {
-          this->councilOfShamans.enqueue(findEgg, len, i, 0, W-1, A, eggs, this).wait();
+          this->councilOfShamans.enqueue(findEgg, len, i, 0, W-1, A, eggs,
+                  this, numberOfShamans).wait();
       }
       return A->at(n-1)[W-1];
   }
 
-  static void sortGrains(const uint64_t& len, size_t f, size_t r, std::vector<GrainOfSand>* grains, TeamAdventure* team) {
+  static void sortGrains(const uint64_t& len, size_t f, size_t r, std::vector<GrainOfSand>* grains,
+          TeamAdventure* team, uint64_t sha) {
       if(r-f <= len) {
           std::sort(grains->begin()+f,grains->begin()+r+1);
       } else {
-          uint64_t m = (f+r)/2;
-          auto x = team->councilOfShamans.enqueue(sortGrains, len, f, m, grains, team);
-          sortGrains(len, m+1, r, grains, team);
+          uint64_t m = (r-f)*std::floor(sha/2)/sha + f;
+          uint64_t help = sha;
+          sha /= 2;
+          auto x = team->councilOfShamans.enqueue(sortGrains, len, f, m, grains, team, sha);
+          sortGrains(len, m+1, r, grains, team, help-sha);
           x.wait();
           std::vector<GrainOfSand> full;
           std::inplace_merge(grains->begin()+f, grains->begin()+m+1, grains->begin()+r+1,
@@ -130,10 +137,11 @@ public:
 
   virtual void arrangeSand(std::vector<GrainOfSand>& grains) {
       const uint64_t len = grains.size()/numberOfShamans+1;
-      sortGrains(len, 0, grains.size()-1, &grains, this);
+      sortGrains(len, 0, grains.size()-1, &grains, this, numberOfShamans);
   }
 
-    static Crystal findCrystal(const uint64_t& len, size_t f, size_t r, std::vector<Crystal>& crystals, TeamAdventure *team) {
+    static Crystal findCrystal(const uint64_t& len, size_t f, size_t r, std::vector<Crystal>& crystals,
+            TeamAdventure *team, uint64_t sha) {
         if(r-f <= len) {
             auto best = crystals[f];
             auto s = crystals.size();
@@ -142,9 +150,11 @@ public:
             }
             return best;
         } else {
-            uint64_t m = (f+r)/2;
-            auto x = team->councilOfShamans.enqueue(findCrystal, len, f, m, crystals, team);
-            auto y = findCrystal(len, m+1, r, crystals, team);
+            uint64_t m = (r-f)*std::floor(sha/2)/sha + f;
+            uint64_t help = sha;
+            sha /= 2;
+            auto x = team->councilOfShamans.enqueue(findCrystal, len, f, m, crystals, team, sha);
+            auto y = findCrystal(len, m+1, r, crystals, team, help-sha);
             auto z = x.get();
             return z < y ? y : z;
         }
@@ -152,7 +162,8 @@ public:
 
   virtual Crystal selectBestCrystal(std::vector<Crystal>& crystals) {
       const uint64_t len = crystals.size()/numberOfShamans+1;
-      return this->councilOfShamans.enqueue(findCrystal, len, 0, crystals.size()-1, crystals, this).get();
+      return this->councilOfShamans.enqueue(findCrystal, len, 0, crystals.size()-1, crystals,
+              this, numberOfShamans).get();
   }
 };
 
