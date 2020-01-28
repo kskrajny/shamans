@@ -27,20 +27,31 @@ class LonesomeAdventure : public Adventure {
   LonesomeAdventure() {}
 
   virtual uint64_t packEggs(std::vector<Egg>& eggs, BottomlessBag& bag) {
-      uint64_t W = bag.getCapacity()+1;
+      uint64_t S = bag.getCapacity()+1;
       uint64_t n = eggs.size()+1;
-      std::vector<std::vector<uint64_t >> A(n, std::vector<uint64_t>(W, 0));
-      for(uint64_t i=1;i<n;i++) {
-          for (uint64_t j=0;j<W;j++) {
+      std::vector<std::vector<bool>> B(n, std::vector<bool>(S, false));
+      std::vector<std::vector<uint64_t>> A(n, std::vector<uint64_t>(S, 0));
+      for (uint64_t j=0;j<S;j++) {
+          for(uint64_t i=1;i<n;i++) {
               uint64_t size = eggs[i-1].getSize();
               if (size > j) {
                   A[i][j] = A[i-1][j];
               } else {
                   A[i][j] = std::max(A[i-1][j], A[i-1][j-size] + eggs[i-1].getWeight());
+                  if(A[i][j] > A[i-1][j]) B[i][j] = true;
               }
           }
       }
-      return A[n-1][W-1];
+      uint64_t s = A[n-1][S-1];
+      uint64_t i = n-1;
+      while(i != 0) {
+          if(B[i][s]) {
+              bag.addEgg(eggs[i-1]);
+              s -= eggs[i-1].getSize();
+          }
+          i--;
+      }
+      return A[n-1][S-1];
   }
 
   virtual void arrangeSand(std::vector<GrainOfSand>& grains) {
@@ -63,112 +74,42 @@ private:
     uint64_t numberOfShamans;
     ThreadPool councilOfShamans;
 
-    class EggsHunter {
-    public:
-
-        std::vector<Egg> eggs;
-        std::vector<size_t> best_stack;
-        uint64_t max_weight;
-        std::mutex mut;
-        ThreadPool *councilOfShamans;
-        std::atomic<uint64_t > jobs;
-        std::condition_variable cv;
-        std::mutex cv_m;
-
-        EggsHunter(std::vector<Egg>& e, std::vector<size_t>& b, ThreadPool* t) {
-            eggs = e;
-            best_stack = b;
-            max_weight = 0;
-            councilOfShamans = t;
-            jobs = 1;
-        }
-
-        class drakeWrap {// holds some values for function eggCount
-        public:
-            uint64_t start;
-            uint64_t stop;
-            uint64_t cap;
-            uint64_t weight;
-            std::vector<size_t> stack;
-
-            explicit drakeWrap(size_t s, uint64_t c) {
-                start = 0;
-                stop = s;
-                cap = c;
-                weight = 0;
-            }
-
-            drakeWrap operator=(drakeWrap const& other) {
-                this->start = other.start;
-                this->stop = other.stop;
-                this->cap = other.cap;
-                this->weight = other.weight;
-                this->stack = other.stack;
-                return *this;
-            }
-        };
-
-        static void eggsCount(drakeWrap wrap, EggsHunter *hunter) {
-            if(wrap.start == wrap.stop) { // if tasks are divided
-                uint64_t size = hunter->eggs[wrap.start].getSize();
-                if(wrap.cap >= size) { // if elem can be added
-                    //update drakeWrap
-                    wrap.weight += hunter->eggs[wrap.start].getWeight();
-                    wrap.cap -= size;
-                    wrap.stack.push_back(wrap.start);
-                    wrap.start++;
-                    wrap.stop = hunter->eggs.size()-1;
-                    if(wrap.start <= wrap.stop) {
-                        hunter->jobs++;
-                        hunter->councilOfShamans->enqueue(EggsHunter::eggsCount, wrap, hunter);
-                    } else {
-                        if(hunter->max_weight < wrap.weight) {
-                            hunter->mut.lock();
-                            hunter->max_weight = wrap.weight;
-                            hunter->best_stack = wrap.stack;
-                            hunter->mut.unlock();
-                        }
-                    }
-                } else { // no more eggs
-                    if(hunter->max_weight < wrap.weight) {
-                        hunter->mut.lock();
-                        hunter->max_weight = wrap.weight;
-                        hunter->best_stack = wrap.stack;
-                        hunter->mut.unlock();
-                    }
-                }
-            } else {
-                uint64_t mid = (wrap.start + wrap.stop)/2;
-                drakeWrap w1 = wrap;
-                drakeWrap w2 = wrap;
-                w1.stop = mid;
-                w2.start = mid+1;
-                hunter->jobs += 2;
-                hunter->councilOfShamans->enqueue(EggsHunter::eggsCount, w1, hunter);
-                hunter->councilOfShamans->enqueue(EggsHunter::eggsCount, w2, hunter);
-            }
-            hunter->jobs--;
-            if(hunter->jobs == 0) hunter->cv.notify_all();
-        }
-    };
-
 public:
   explicit TeamAdventure(uint64_t numberOfShamansArg)
       : numberOfShamans(numberOfShamansArg),
         councilOfShamans(numberOfShamansArg)
-        {}
+        {};
+
+  typedef std::vector<uint64_t> col;
+  typedef std::vector<col> matrix;
+  typedef std::shared_ptr<matrix> shr;
+  static void findEgg(const uint64_t& len, const uint64_t& e, size_t f, size_t r, shr A, std::vector<Egg>& eggs, TeamAdventure* team) {
+      if(r-f <= len) {
+          for(uint64_t i=f;i<=r;i++) {
+              uint64_t size = eggs[e-1].getSize();
+              if (size > i) {
+                  A->at(e)[i] = A->at(e-1)[i];
+              } else {
+                  A->at(e)[i] = std::max(A->at(e-1)[i], A->at(e-1)[i-size] + eggs[e-1].getWeight());
+              }
+          }
+      } else {
+          uint64_t m = (f+r)/2;
+          auto x = team->councilOfShamans.enqueue(findEgg, len, e, f, m, A, eggs, team);
+          findEgg(len, e, m+1, r, A, eggs, team);
+          x.wait();
+      }
+  }
 
   uint64_t packEggs(std::vector<Egg>& eggs, BottomlessBag& bag) {
-      std::vector<size_t> stack;
-      EggsHunter hunter(eggs, stack, &councilOfShamans);
-      EggsHunter::drakeWrap wrap(eggs.size()-1, bag.getCapacity());
-      EggsHunter::eggsCount(wrap, &hunter);
-      std::unique_lock<std::mutex> lk(hunter.cv_m);
-      hunter.cv.wait(lk);
-      for(auto &x : hunter.best_stack) {
-          bag.addEgg(eggs[x]);
+      uint64_t W = bag.getCapacity()+1;
+      uint64_t n = eggs.size()+1;
+      const uint64_t len = W/numberOfShamans+1;
+      auto A = std::make_shared<matrix>(n, col(W, 0));
+      for (uint64_t i=1;i<n;i++) {
+          this->councilOfShamans.enqueue(findEgg, len, i, 0, W-1, A, eggs, this).wait();
       }
-      return hunter.max_weight;
+      return A->at(n-1)[W-1];
   }
 
   static void sortGrains(const uint64_t& len, size_t f, size_t r, std::vector<GrainOfSand>* grains, TeamAdventure* team) {
