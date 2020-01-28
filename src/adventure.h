@@ -192,27 +192,26 @@ public:
       sortGrains(len, 0, grains.size()-1, &grains, this);
   }
 
-    static Crystal findCrystal(size_t f, size_t r, std::vector<Crystal>& crystals) {
-        auto best = crystals[f];
-        auto s = crystals.size();
-        for(uint64_t i=f+1;i<r+1 && i<s;i++) {
-            best = best < crystals[i] ? crystals[i] : best;
+    static Crystal findCrystal(const uint64_t& len, size_t f, size_t r, std::vector<Crystal>& crystals, TeamAdventure *team) {
+        if(r-f <= len) {
+            auto best = crystals[f];
+            auto s = crystals.size();
+            for(uint64_t i=f+1;i<r+1 && i<s;i++) {
+                best = best < crystals[i] ? crystals[i] : best;
+            }
+            return best;
+        } else {
+            uint64_t m = (f+r)/2;
+            auto x = team->councilOfShamans.enqueue(findCrystal, len, f, m, crystals, team);
+            auto y = findCrystal(len, m+1, r, crystals, team);
+            auto z = x.get();
+            return z < y ? y : z;
         }
-        return best;
     }
 
   virtual Crystal selectBestCrystal(std::vector<Crystal>& crystals) {
       const uint64_t len = crystals.size()/numberOfShamans+1;
-      std::future<Crystal> fut[numberOfShamans];
-      Crystal best = Crystal();
-      for(uint64_t i=0;i<numberOfShamans;i++) {
-          fut[i] = this->councilOfShamans.enqueue(findCrystal, i*len, (i+1)*len, crystals);
-      }
-      for(uint64_t i=0;i<numberOfShamans;i++) {
-          auto crystal = fut[i].get();
-          best = best < crystal ? crystal : best;
-      }
-      return best;
+      return this->councilOfShamans.enqueue(findCrystal, len, 0, crystals.size()-1, crystals, this).get();
   }
 };
 
