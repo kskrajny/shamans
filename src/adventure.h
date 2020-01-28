@@ -9,6 +9,8 @@
 #include "./types.h"
 #include "./utils.h"
 
+#include <cmath>
+
 class Adventure {
  public:
   virtual ~Adventure() = default;
@@ -25,7 +27,6 @@ class LonesomeAdventure : public Adventure {
   LonesomeAdventure() {}
 
   virtual uint64_t packEggs(std::vector<Egg>& eggs, BottomlessBag& bag) {
-      //about size
       uint64_t W = bag.getCapacity()+1;
       uint64_t n = eggs.size()+1;
       std::vector<std::vector<uint64_t >> A(n, std::vector<uint64_t>(W, 0));
@@ -43,20 +44,23 @@ class LonesomeAdventure : public Adventure {
   }
 
   virtual void arrangeSand(std::vector<GrainOfSand>& grains) {
-    // TODO Implement this method
-    throw std::runtime_error("Not implemented");
+    std::sort(grains.begin(), grains.end());
   }
 
   virtual Crystal selectBestCrystal(std::vector<Crystal>& crystals) {
-    // TODO Implement this method
-    throw std::runtime_error("Not implemented");
+      if(crystals.size() == 0) throw std::exception();
+      Crystal best = crystals[0];
+      for(size_t i=1;i<crystals.size();i++) {
+          best = best < crystals[i] ? crystals[i] : best;
+      }
+      return best;
   }
 };
 
 class TeamAdventure : public Adventure {
 private:
 
-    //uint64_t numberOfShamans;
+    uint64_t numberOfShamans;
     ThreadPool councilOfShamans;
 
     class EggsHunter {
@@ -150,7 +154,7 @@ private:
 
 public:
   explicit TeamAdventure(uint64_t numberOfShamansArg)
-      : //numberOfShamans(numberOfShamansArg),
+      : numberOfShamans(numberOfShamansArg),
         councilOfShamans(numberOfShamansArg)
         {}
 
@@ -167,16 +171,50 @@ public:
       return hunter.max_weight;
   }
 
-  virtual void arrangeSand(std::vector<GrainOfSand>& grains) {
-    // TODO Implement this method
-    throw std::runtime_error("Not implemented");
+  static void sortGrains(const uint64_t& len, size_t f, size_t r, std::vector<GrainOfSand>* grains, TeamAdventure* team) {
+      if(r-f <= len) {
+          std::sort(grains->begin()+f,grains->begin()+r+1);
+      } else {
+          uint64_t m = (f+r)/2;
+          auto x = team->councilOfShamans.enqueue(sortGrains, len, f, m, grains, team);
+          sortGrains(len, m+1, r, grains, team);
+          x.wait();
+          std::vector<GrainOfSand> full;
+          std::inplace_merge(grains->begin()+f, grains->begin()+m+1, grains->begin()+r+1,
+                  [](const GrainOfSand& a, const GrainOfSand& b) {
+              return (a < b);
+          });
+      }
   }
+
+  virtual void arrangeSand(std::vector<GrainOfSand>& grains) {
+      const uint64_t len = grains.size()/numberOfShamans+1;
+      sortGrains(len, 0, grains.size()-1, &grains, this);
+  }
+
+    static Crystal findCrystal(size_t f, size_t r, std::vector<Crystal>& crystals) {
+        auto best = crystals[f];
+        auto s = crystals.size();
+        for(uint64_t i=f+1;i<r+1 && i<s;i++) {
+            best = best < crystals[i] ? crystals[i] : best;
+        }
+        return best;
+    }
 
   virtual Crystal selectBestCrystal(std::vector<Crystal>& crystals) {
-    // TODO Implement this method
-    throw std::runtime_error("Not implemented");
+      const uint64_t len = crystals.size()/numberOfShamans+1;
+      std::future<Crystal> fut[numberOfShamans];
+      Crystal best = Crystal();
+      for(uint64_t i=0;i<numberOfShamans;i++) {
+          fut[i] = this->councilOfShamans.enqueue(findCrystal, i*len, (i+1)*len, crystals);
+      }
+      for(uint64_t i=0;i<numberOfShamans;i++) {
+          auto crystal = fut[i].get();
+          best = best < crystal ? crystal : best;
+      }
+      return best;
   }
-
 };
+
 
 #endif  // SRC_ADVENTURE_H_

@@ -43,9 +43,9 @@ int main(int argc, char **argv) {
            std::shared_ptr<Adventure>(new TeamAdventure(4)),
            std::shared_ptr<Adventure>(new TeamAdventure(8))}) {
     if (argc == 1) {
-      // runAndPrintDuration([&adventure]() {
+      runAndPrintDuration([&adventure]() {
       testCase1(*adventure);
-      // });
+      });
     } else {
       std::vector<Crystal> t2(2575757);
       std::generate(t2.begin(), t2.end(), std::rand);
@@ -55,13 +55,13 @@ int main(int argc, char **argv) {
       std::generate(t3.begin(), t3.end(), std::rand);
       Crystal r3 = *std::max_element(t3.begin(), t3.end());
 
-      // runAndPrintDuration( [&adventure, &t2, &r2]() {
+      runAndPrintDuration( [&adventure, &t2, &r2]() {
       runAndVerify(*adventure, t2, r2);
-      //});
+      });
 
-      // runAndPrintDuration(    [&adventure, &t3, &r3]() {
+      runAndPrintDuration(    [&adventure, &t3, &r3]() {
       runAndVerify(*adventure, t3, r3);
-      // });
+      });
     }
   }
 

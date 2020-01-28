@@ -58,8 +58,8 @@ int main(int argc, char **argv) {
   for (std::shared_ptr<Adventure> adventure :
        std::vector<std::shared_ptr<Adventure> >{
            std::shared_ptr<Adventure>(new LonesomeAdventure{}),
-           //std::shared_ptr<Adventure>(new TeamAdventure(1)),
-           //std::shared_ptr<Adventure>(new TeamAdventure(2)),
+           std::shared_ptr<Adventure>(new TeamAdventure(1)),
+           std::shared_ptr<Adventure>(new TeamAdventure(2)),
            std::shared_ptr<Adventure>(new TeamAdventure(3)),
            std::shared_ptr<Adventure>(new TeamAdventure(4)),
            std::shared_ptr<Adventure>(new TeamAdventure(8))}) {

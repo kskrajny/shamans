@@ -39,9 +39,9 @@ int main(int argc, char **argv) {
            std::shared_ptr<Adventure>(new TeamAdventure(4)),
            std::shared_ptr<Adventure>(new TeamAdventure(8))}) {
     if (argc == 1) {
-      // runAndPrintDuration([&adventure]() {
+      runAndPrintDuration([&adventure]() {
       testCase1(*adventure);
-      //});
+      });
     } else {
       std::vector<GrainOfSand> t2(50000);
       std::generate(t2.begin(), t2.end(), std::rand);
@@ -53,14 +53,13 @@ int main(int argc, char **argv) {
       std::vector<GrainOfSand> r3 = t3;
       std::sort(r3.begin(), r3.end());
 
-      //    runAndPrintDuration(
-      //      [&adventure, &t2, &r2]() {
+      runAndPrintDuration([&adventure, &t2, &r2]() {
       runAndVerify(*adventure, t2, r2);
-      // });
+      });
 
-      // runAndPrintDuration(    [&adventure, &t3, &r3]() {
+      runAndPrintDuration(    [&adventure, &t3, &r3]() {
       runAndVerify(*adventure, t3, r3);
-      // });
+      });
     }
   }
   return 0;
