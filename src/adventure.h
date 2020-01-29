@@ -9,7 +9,6 @@
 #include "./types.h"
 #include "./utils.h"
 
-#include <cmath>
 
 class Adventure {
  public:
@@ -104,7 +103,8 @@ public:
               }
           }
       } else {
-          uint64_t m = (r-f)*std::floor(sha/2)/sha + f;
+          uint64_t floor = sha/2;
+          uint64_t m = (r-f)*floor/sha + f;
           uint64_t help = sha;
           sha /= 2;
           auto x = team->councilOfShamans.enqueue(findEgg, len, e, f, m, A, B, eggs, team, sha);
@@ -140,7 +140,8 @@ public:
       if(r-f <= len) {
           std::sort(grains->begin()+f,grains->begin()+r+1);
       } else {
-          uint64_t m = (r-f)*std::floor(sha/2)/sha + f;
+          uint64_t floor = sha/2;
+          uint64_t m = (r-f)*floor/sha + f;
           uint64_t help = sha;
           sha /= 2;
           auto x = team->councilOfShamans.enqueue(sortGrains, len, f, m, grains, team, sha);
@@ -169,7 +170,8 @@ public:
             }
             return best;
         } else {
-            uint64_t m = (r-f)*std::floor(sha/2)/sha + f;
+            uint64_t floor = sha/2;
+            uint64_t m = (r-f)*floor/sha + f;
             uint64_t help = sha;
             sha /= 2;
             auto x = team->councilOfShamans.enqueue(findCrystal, len, f, m, crystals, team, sha);
