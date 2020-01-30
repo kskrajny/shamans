@@ -30,6 +30,7 @@ void testCase3(Adventure &adventure) {
   for (int i = 0; i < 33; ++i) {
     eggs.push_back(Egg(i, i * i + 7));
   }
+
   correctnessTest(eggs, BottomlessBag(100), 2969, adventure);
 }
 
@@ -38,6 +39,7 @@ void testCase4(Adventure &adventure) {
   for (int i = 0; i < 100; ++i) {
     eggs.push_back(Egg(i % 10, i * 3 + 2));
   }
+
   correctnessTest(eggs, BottomlessBag(10000), 15050, adventure);
 }
 
@@ -47,6 +49,7 @@ void testCase5(Adventure &adventure) {
   for (int i = 0; i < 700; ++i) {
     eggs.push_back(Egg(i, i * 5 + 33));
   }
+
   correctnessTest(eggs, BottomlessBag(2000), 12079, adventure);
 }
 
@@ -60,19 +63,19 @@ int main(int argc, char **argv) {
            std::shared_ptr<Adventure>(new TeamAdventure(4)),
            std::shared_ptr<Adventure>(new TeamAdventure(8))}) {
     if (argc == 1) {
-      runAndPrintDuration([&adventure]() {
+      // runAndPrintDuration([&adventure]() {
       testCase1(*adventure);
       testCase2(*adventure);
       testCase3(*adventure);
-      });
+      // });
     } else {
-      runAndPrintDuration([&adventure]() {
+      // runAndPrintDuration([&adventure]() {
       testCase4(*adventure);
-      });
+      //});
 
-      runAndPrintDuration([&adventure]() {
+      // runAndPrintDuration([&adventure]() {
       testCase5(*adventure);
-      });
+      //});
     }
   }
   return 0;

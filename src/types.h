@@ -48,7 +48,7 @@ class GrainOfSand {
     return *this;
   }
 
-private:
+ private:
   uint64_t size;
 };
 

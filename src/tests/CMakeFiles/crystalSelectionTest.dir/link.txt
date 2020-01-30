@@ -1,0 +1,1 @@
+/usr/bin/c++    -Wall -Wunused-function -Wwrite-strings -Wformat -Wformat-security -Wparentheses -Wsequence-point -Wno-system-headers -Werror -Winit-self  -O2 -DNDEBUG -Wuninitialized  -rdynamic CMakeFiles/crystalSelectionTest.dir/crystalSelectionTest.cpp.o  -o crystalSelectionTest -lpthread 

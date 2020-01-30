@@ -1,0 +1,12 @@
+/home/jakub/sham/CMakeFiles/rebuild_cache.dir
+/home/jakub/sham/CMakeFiles/test.dir
+/home/jakub/sham/CMakeFiles/edit_cache.dir
+/home/jakub/sham/src/CMakeFiles/rebuild_cache.dir
+/home/jakub/sham/src/CMakeFiles/test.dir
+/home/jakub/sham/src/CMakeFiles/edit_cache.dir
+/home/jakub/sham/src/tests/CMakeFiles/edit_cache.dir
+/home/jakub/sham/src/tests/CMakeFiles/test.dir
+/home/jakub/sham/src/tests/CMakeFiles/crystalSelectionTest.dir
+/home/jakub/sham/src/tests/CMakeFiles/rebuild_cache.dir
+/home/jakub/sham/src/tests/CMakeFiles/bottomlessBagTest.dir
+/home/jakub/sham/src/tests/CMakeFiles/sandArrangementTest.dir

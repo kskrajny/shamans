@@ -1,0 +1,17 @@
+[
+{
+  "directory": "/home/jakub/sham/src/tests",
+  "command": "/usr/bin/c++   -I/home/jakub/sham/src    -Wall -Wunused-function -Wwrite-strings -Wformat -Wformat-security -Wparentheses -Wsequence-point -Wno-system-headers -Werror -Winit-self  -O2 -DNDEBUG -Wuninitialized   -std=gnu++11 -o CMakeFiles/crystalSelectionTest.dir/crystalSelectionTest.cpp.o -c /home/jakub/sham/src/tests/crystalSelectionTest.cpp",
+  "file": "/home/jakub/sham/src/tests/crystalSelectionTest.cpp"
+},
+{
+  "directory": "/home/jakub/sham/src/tests",
+  "command": "/usr/bin/c++   -I/home/jakub/sham/src    -Wall -Wunused-function -Wwrite-strings -Wformat -Wformat-security -Wparentheses -Wsequence-point -Wno-system-headers -Werror -Winit-self  -O2 -DNDEBUG -Wuninitialized   -std=gnu++11 -o CMakeFiles/bottomlessBagTest.dir/bottomlessBagTest.cpp.o -c /home/jakub/sham/src/tests/bottomlessBagTest.cpp",
+  "file": "/home/jakub/sham/src/tests/bottomlessBagTest.cpp"
+},
+{
+  "directory": "/home/jakub/sham/src/tests",
+  "command": "/usr/bin/c++   -I/home/jakub/sham/src    -Wall -Wunused-function -Wwrite-strings -Wformat -Wformat-security -Wparentheses -Wsequence-point -Wno-system-headers -Werror -Winit-self  -O2 -DNDEBUG -Wuninitialized   -std=gnu++11 -o CMakeFiles/sandArrangementTest.dir/sandArrangementTest.cpp.o -c /home/jakub/sham/src/tests/sandArrangementTest.cpp",
+  "file": "/home/jakub/sham/src/tests/sandArrangementTest.cpp"
+}
+]
